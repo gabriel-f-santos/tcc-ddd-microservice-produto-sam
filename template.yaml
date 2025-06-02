@@ -1,0 +1,171 @@
+# template.yaml - Produto Service
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'Produto Service - Product Management Microservice'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+    Description: Environment name
+
+  DatabasePassword:
+    Type: String
+    NoEcho: true
+    Default: dev123456
+    Description: Database password
+
+Globals:
+  Function:
+    Runtime: python3.13
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        ENVIRONMENT: !Ref Environment
+        LOG_LEVEL: INFO
+
+Resources:
+  # === PRODUCT CRUD FUNCTIONS ===
+  
+  CreateProductFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handlers.produto_handler.create_product_handler
+      Description: Create new product
+      Events:
+        CreateProduct:
+          Type: Api
+          Properties:
+            Path: /products
+            Method: POST
+
+  GetProductFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handlers.produto_handler.get_product_handler
+      Description: Get product by ID
+      Events:
+        GetProduct:
+          Type: Api
+          Properties:
+            Path: /products/{product_id}
+            Method: GET
+
+  GetProductBySkuFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handlers.produto_handler.get_product_by_sku_handler
+      Description: Get product by SKU
+      Events:
+        GetProductBySku:
+          Type: Api
+          Properties:
+            Path: /products/sku/{sku}
+            Method: GET
+
+  ListProductsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handlers.produto_handler.list_products_handler
+      Description: List products with pagination
+      Events:
+        ListProducts:
+          Type: Api
+          Properties:
+            Path: /products
+            Method: GET
+
+  UpdateProductFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handlers.produto_handler.update_product_handler
+      Description: Update product
+      Events:
+        UpdateProduct:
+          Type: Api
+          Properties:
+            Path: /products/{product_id}
+            Method: PUT
+
+  DeleteProductFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handlers.produto_handler.delete_product_handler
+      Description: Delete product
+      Events:
+        DeleteProduct:
+          Type: Api
+          Properties:
+            Path: /products/{product_id}
+            Method: DELETE
+
+  # === SEARCH AND FILTER FUNCTIONS ===
+
+  SearchProductsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handlers.produto_handler.search_products_handler
+      Description: Search products
+      Events:
+        SearchProducts:
+          Type: Api
+          Properties:
+            Path: /products/search
+            Method: POST
+
+  GetProductsByCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handlers.produto_handler.get_products_by_category_handler
+      Description: Get products by category
+      Events:
+        GetProductsByCategory:
+          Type: Api
+          Properties:
+            Path: /products/category/{categoria}
+            Method: GET
+
+  # === UTILITY FUNCTIONS ===
+
+  HealthCheckFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handlers.produto_handler.health_check_handler
+      Description: Health check endpoint
+      Events:
+        HealthCheck:
+          Type: Api
+          Properties:
+            Path: /health
+            Method: GET
+
+Outputs:
+  ProdutoApiUrl:
+    Description: "API Gateway endpoint URL for Produto service"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Export:
+      Name: !Sub "${Environment}-produto-api-url"
+
+  # Export function names for monitoring
+  CreateProductFunctionName:
+    Description: "Create Product Function Name"
+    Value: !Ref CreateProductFunction
+    Export:
+      Name: !Sub "${Environment}-create-product-function"
+
+  ListProductsFunctionName:
+    Description: "List Products Function Name"
+    Value: !Ref ListProductsFunction
+    Export:
+      Name: !Sub "${Environment}-list-products-function"
