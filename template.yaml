@@ -1,4 +1,3 @@
-# template.yaml - Produto Service
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: 'Produto Service - Product Management Microservice'
@@ -17,6 +16,18 @@ Parameters:
     Description: Database password
 
 Globals:
+  # Aplica o mesmo Lambda Authorizer em todas as rotas, exceto na health
+  Api:
+    Auth:
+      DefaultAuthorizer: LambdaAuth
+      AddDefaultAuthorizerToCorsPreflight: false
+      Authorizers:
+        LambdaAuth:
+          FunctionArn: !ImportValue
+            Fn::Sub: '${Environment}-AuthFunctionArn'
+          Identity:
+            Header: Authorization
+
   Function:
     Runtime: python3.13
     Timeout: 30
@@ -28,7 +39,7 @@ Globals:
 
 Resources:
   # === PRODUCT CRUD FUNCTIONS ===
-  
+
   CreateProductFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -149,6 +160,8 @@ Resources:
           Properties:
             Path: /health
             Method: GET
+            Auth:
+              Authorizer: NONE
 
 Outputs:
   ProdutoApiUrl:
@@ -157,7 +170,6 @@ Outputs:
     Export:
       Name: !Sub "${Environment}-produto-api-url"
 
-  # Export function names for monitoring
   CreateProductFunctionName:
     Description: "Create Product Function Name"
     Value: !Ref CreateProductFunction
