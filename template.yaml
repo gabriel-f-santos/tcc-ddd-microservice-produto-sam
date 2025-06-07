@@ -24,7 +24,7 @@ Globals:
       Authorizers:
         LambdaAuth:
           FunctionArn: !ImportValue
-            Fn::Sub: '${Environment}-AuthFunctionArn'
+            Fn::Sub: 'AuthFunctionArn'
           Identity:
             Header: Authorization
 
