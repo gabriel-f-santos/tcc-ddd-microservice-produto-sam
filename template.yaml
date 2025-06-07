@@ -49,7 +49,12 @@ Resources:
               Header: Authorization
       Tags:
         Service: produto   # tag aplicada ao API Gateway
-
+    VpcConfig:
+      SecurityGroupIds:
+        - sg-0023175edfd49ca18
+      SubnetIds:
+        - subnet-0f12951fa6cccef8e #privada
+        - subnet-0d9dc74d2a9c8c4f6 #privada
   # === PRODUCT CRUD FUNCTIONS ===
 
   CreateProductFunction:
@@ -63,7 +68,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /products
+            Path: /api/v1/produtos
             Method: POST
 
   GetProductFunction:
@@ -77,7 +82,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /products/{product_id}
+            Path: /api/v1/products/{product_id}
             Method: GET
 
   GetProductBySkuFunction:
@@ -91,7 +96,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /products/sku/{sku}
+            Path: /api/v1/products/sku/{sku}
             Method: GET
 
   ListProductsFunction:
@@ -105,7 +110,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /products
+            Path: /api/v1/produtos
             Method: GET
 
   UpdateProductFunction:
@@ -119,7 +124,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /products/{product_id}
+            Path: /api/v1/products/{product_id}
             Method: PUT
 
   DeleteProductFunction:
@@ -133,7 +138,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /products/{product_id}
+            Path: /api/v1/products/{product_id}
             Method: DELETE
 
   # === SEARCH AND FILTER FUNCTIONS ===
@@ -149,7 +154,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /products/search
+            Path: /api/v1/products/search
             Method: POST
 
   GetProductsByCategoryFunction:
@@ -163,7 +168,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /products/category/{categoria}
+            Path: /api/v1/products/category/{categoria}
             Method: GET
 
   # === HEALTH CHECK (público) ===
@@ -179,7 +184,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /health
+            Path: /api/v1/health
             Method: GET
             Auth:
               Authorizer: NONE
@@ -189,16 +194,16 @@ Outputs:
     Description: "API Gateway endpoint URL for Produto service"
     Value: !Sub "https://${ProdutoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
     Export:
-      Name: !Sub "${Environment}-produto-api-url"
+      Name: "produto-api-url"
 
   CreateProductFunctionName:
     Description: "Create Product Function Name"
     Value: !Ref CreateProductFunction
     Export:
-      Name: !Sub "${Environment}-create-product-function"
+      Name: "create-product-function"
 
   ListProductsFunctionName:
     Description: "List Products Function Name"
     Value: !Ref ListProductsFunction
     Export:
-      Name: !Sub "${Environment}-list-products-function"
+      Name: "list-products-function"
