@@ -16,18 +16,6 @@ Parameters:
     Description: Database password
 
 Globals:
-  # Aplica o mesmo Lambda Authorizer em todas as rotas, exceto na health
-  Api:
-    Auth:
-      DefaultAuthorizer: LambdaAuth
-      AddDefaultAuthorizerToCorsPreflight: false
-      Authorizers:
-        LambdaAuth:
-          FunctionArn: !ImportValue
-            Fn::Sub: 'AuthFunctionArn'
-          Identity:
-            Header: Authorization
-
   Function:
     Runtime: python3.13
     Timeout: 30
@@ -36,8 +24,27 @@ Globals:
       Variables:
         ENVIRONMENT: !Ref Environment
         LOG_LEVEL: INFO
+    Tags:
+      Service: produto    # tag aplicada a todas as Lambdas
 
 Resources:
+  # API Gateway explícito para suportar DefaultAuthorizer
+  ProdutoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Auth:
+        DefaultAuthorizer: LambdaAuth
+        AddDefaultAuthorizerToCorsPreflight: false
+        Authorizers:
+          LambdaAuth:
+            FunctionArn: !ImportValue
+              Fn::Sub: "AuthFunctionArn"
+            Identity:
+              Header: Authorization
+      Tags:
+        Service: produto   # tag aplicada ao API Gateway
+
   # === PRODUCT CRUD FUNCTIONS ===
 
   CreateProductFunction:
@@ -50,6 +57,7 @@ Resources:
         CreateProduct:
           Type: Api
           Properties:
+            RestApiId: !Ref ProdutoApi
             Path: /products
             Method: POST
 
@@ -63,6 +71,7 @@ Resources:
         GetProduct:
           Type: Api
           Properties:
+            RestApiId: !Ref ProdutoApi
             Path: /products/{product_id}
             Method: GET
 
@@ -76,6 +85,7 @@ Resources:
         GetProductBySku:
           Type: Api
           Properties:
+            RestApiId: !Ref ProdutoApi
             Path: /products/sku/{sku}
             Method: GET
 
@@ -89,6 +99,7 @@ Resources:
         ListProducts:
           Type: Api
           Properties:
+            RestApiId: !Ref ProdutoApi
             Path: /products
             Method: GET
 
@@ -102,6 +113,7 @@ Resources:
         UpdateProduct:
           Type: Api
           Properties:
+            RestApiId: !Ref ProdutoApi
             Path: /products/{product_id}
             Method: PUT
 
@@ -115,6 +127,7 @@ Resources:
         DeleteProduct:
           Type: Api
           Properties:
+            RestApiId: !Ref ProdutoApi
             Path: /products/{product_id}
             Method: DELETE
 
@@ -130,6 +143,7 @@ Resources:
         SearchProducts:
           Type: Api
           Properties:
+            RestApiId: !Ref ProdutoApi
             Path: /products/search
             Method: POST
 
@@ -143,10 +157,11 @@ Resources:
         GetProductsByCategory:
           Type: Api
           Properties:
+            RestApiId: !Ref ProdutoApi
             Path: /products/category/{categoria}
             Method: GET
 
-  # === UTILITY FUNCTIONS ===
+  # === HEALTH CHECK (público) ===
 
   HealthCheckFunction:
     Type: AWS::Serverless::Function
@@ -158,6 +173,7 @@ Resources:
         HealthCheck:
           Type: Api
           Properties:
+            RestApiId: !Ref ProdutoApi
             Path: /health
             Method: GET
             Auth:
@@ -166,7 +182,7 @@ Resources:
 Outputs:
   ProdutoApiUrl:
     Description: "API Gateway endpoint URL for Produto service"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Value: !Sub "https://${ProdutoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
     Export:
       Name: !Sub "${Environment}-produto-api-url"
 
