@@ -1,6 +1,7 @@
 # src/handlers/produto_handler.py
 """Produto (Product) Lambda handlers."""
 
+import asyncio
 import os
 from datetime import datetime
 from uuid import UUID
@@ -8,7 +9,7 @@ from uuid import UUID
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils.lambda_decorators import (
+from src.utils.lambda_decorators import (
     lambda_handler,
     with_database,
     require_auth,
@@ -17,13 +18,15 @@ from utils.lambda_decorators import (
     created_response,
     LambdaException,
 )
-from produto.application.services.produto_application_service import ProdutoApplicationService
-from produto.application.dto.produto_dto import (
+from src.produto.application.services.produto_application_service import ProdutoApplicationService
+from src.produto.application.dto.produto_dto import (
     ProdutoCreateDTO,
     ProdutoUpdateDTO,
     ProdutoSearchDTO,
 )
-from shared.domain.exceptions.base import ValidationException, BusinessRuleException
+from src.shared.domain.exceptions.base import ValidationException, BusinessRuleException
+from src.config import get_settings
+
 
 logger = structlog.get_logger()
 
@@ -61,7 +64,7 @@ async def create_product_handler(
 
 @lambda_handler
 @with_database
-@require_auth(permissions=["produto:read"])
+@require_auth()
 async def get_product_handler(
     event,
     context,

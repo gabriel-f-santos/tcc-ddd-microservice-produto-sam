@@ -31,6 +31,12 @@ Globals:
         DATABASE_URL: !Ref DatabaseUrlParameter
     Tags:
       Service: produto    # tag aplicada a todas as Lambdas
+    VpcConfig:
+      SecurityGroupIds:
+        - sg-0023175edfd49ca18
+      SubnetIds:
+        - subnet-0f12951fa6cccef8e #privada
+        - subnet-0d9dc74d2a9c8c4f6 #privada
 
 Resources:
   # API Gateway explícito para suportar DefaultAuthorizer
@@ -47,21 +53,16 @@ Resources:
               Fn::Sub: "AuthFunctionArn"
             Identity:
               Header: Authorization
+            AuthorizerResultTtlInSeconds: 0
       Tags:
         Service: produto   # tag aplicada ao API Gateway
-    VpcConfig:
-      SecurityGroupIds:
-        - sg-0023175edfd49ca18
-      SubnetIds:
-        - subnet-0f12951fa6cccef8e #privada
-        - subnet-0d9dc74d2a9c8c4f6 #privada
   # === PRODUCT CRUD FUNCTIONS ===
 
   CreateProductFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: handlers.produto_handler.create_product_handler
+      Handler: src.handlers.produto_handler.create_product_handler
       Description: Create new product
       Events:
         CreateProduct:
@@ -75,35 +76,35 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: handlers.produto_handler.get_product_handler
+      Handler: src.handlers.produto_handler.get_product_handler
       Description: Get product by ID
       Events:
         GetProduct:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /api/v1/products/{product_id}
+            Path: /api/v1/produtos/{product_id}
             Method: GET
 
   GetProductBySkuFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: handlers.produto_handler.get_product_by_sku_handler
+      Handler: src.handlers.produto_handler.get_product_by_sku_handler
       Description: Get product by SKU
       Events:
         GetProductBySku:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /api/v1/products/sku/{sku}
+            Path: /api/v1/produtos/sku/{sku}
             Method: GET
 
   ListProductsFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: handlers.produto_handler.list_products_handler
+      Handler: src.handlers.produto_handler.list_products_handler
       Description: List products with pagination
       Events:
         ListProducts:
@@ -117,28 +118,28 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: handlers.produto_handler.update_product_handler
+      Handler: src.handlers.produto_handler.update_product_handler
       Description: Update product
       Events:
         UpdateProduct:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /api/v1/products/{product_id}
+            Path: /api/v1/produtos/{product_id}
             Method: PUT
 
   DeleteProductFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: handlers.produto_handler.delete_product_handler
+      Handler: src.handlers.produto_handler.delete_product_handler
       Description: Delete product
       Events:
         DeleteProduct:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /api/v1/products/{product_id}
+            Path: /api/v1/produtos/{product_id}
             Method: DELETE
 
   # === SEARCH AND FILTER FUNCTIONS ===
@@ -147,28 +148,28 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: handlers.produto_handler.search_products_handler
+      Handler: src.handlers.produto_handler.search_products_handler
       Description: Search products
       Events:
         SearchProducts:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /api/v1/products/search
+            Path: /api/v1/produtos/search
             Method: POST
 
   GetProductsByCategoryFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: handlers.produto_handler.get_products_by_category_handler
+      Handler: src.handlers.produto_handler.get_products_by_category_handler
       Description: Get products by category
       Events:
         GetProductsByCategory:
           Type: Api
           Properties:
             RestApiId: !Ref ProdutoApi
-            Path: /api/v1/products/category/{categoria}
+            Path: /api/v1/produtos/category/{categoria}
             Method: GET
 
   # === HEALTH CHECK (público) ===
@@ -177,7 +178,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: handlers.produto_handler.health_check_handler
+      Handler: src.handlers.produto_handler.health_check_handler
       Description: Health check endpoint
       Events:
         HealthCheck:

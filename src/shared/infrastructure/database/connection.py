@@ -7,6 +7,7 @@ import structlog
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.pool import NullPool
 
 logger = structlog.get_logger()
 
@@ -41,11 +42,7 @@ async def init_db(database_url: str) -> None:
     # Async engine for FastAPI
     async_engine = create_async_engine(
         async_url,
-        echo=False,
-        pool_size=20,
-        max_overflow=30,
-        pool_timeout=30,
-        pool_pre_ping=True
+        poolclass=NullPool,
     )
     
     async_session_factory = async_sessionmaker(

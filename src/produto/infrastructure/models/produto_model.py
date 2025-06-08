@@ -15,7 +15,7 @@ class ProdutoModel(Base):
     """SQLAlchemy model for Produto entity."""
     
     __tablename__ = "produtos"
-    __table_args__ = {"schema": "inventory"}
+    __table_args__ = {"schema": "product"}
     
     id = Column(PGUUID(as_uuid=True), primary_key=True)
     sku = Column(String(50), unique=True, nullable=False, index=True)

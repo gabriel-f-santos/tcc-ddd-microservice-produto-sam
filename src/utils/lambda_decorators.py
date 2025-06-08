@@ -1,18 +1,22 @@
 # src/utils/lambda_decorators.py
 """Decorators para substituir FastAPI Depends em Lambda functions."""
 
+import asyncio
 import json
 import functools
-from typing import Dict, Any, Callable, Optional
+from typing import Dict, Any, Callable, List, Optional
 from dataclasses import dataclass
 
+from src.config import get_settings
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.shared.infrastructure.database.connection import get_async_session
+from src.shared.infrastructure.database.connection import get_async_session, init_db
 
 logger = structlog.get_logger()
 
+
+asyncio.get_event_loop().run_until_complete(init_db(get_settings().database_url))
 
 @dataclass
 class LambdaResponse:
@@ -112,7 +116,8 @@ def require_auth(permissions: Optional[List[str]] = None):
                 "permissoes": perms,
             }
             kwargs["user_info"] = user_info
-
+            # loga o usuário autenticado
+            logger.info(f"USer info {user_info}, perms: {perms}")
             # 2) checa permissões, se fornecidas
             if permissions:
                 allowed = False
