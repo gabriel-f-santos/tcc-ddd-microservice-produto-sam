@@ -147,7 +147,6 @@ class SqlAlchemyProdutoRepository(ProdutoRepository):
             await self.db.flush()
             await self.db.refresh(model)
             
-            logger.info("Product created", product_id=str(model.id), sku=model.sku)
             return self._model_to_entity(model)
             
         except Exception as e:

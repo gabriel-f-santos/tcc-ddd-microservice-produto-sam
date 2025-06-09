@@ -35,7 +35,7 @@ logger = structlog.get_logger()
 
 @lambda_handler
 @with_database
-@require_auth(permissions=["produto:create"])
+@require_auth()
 @validate_request_body(ProdutoCreateDTO)
 async def create_product_handler(
     event,
@@ -100,7 +100,7 @@ async def get_product_handler(
 
 @lambda_handler
 @with_database
-@require_auth(permissions=["produto:read"])
+@require_auth()
 async def get_product_by_sku_handler(
     event,
     context,
@@ -131,7 +131,7 @@ async def get_product_by_sku_handler(
 
 @lambda_handler
 @with_database
-@require_auth(permissions=["produto:read"])
+@require_auth()
 async def list_products_handler(
     event,
     context,
@@ -167,7 +167,7 @@ async def list_products_handler(
 
 @lambda_handler
 @with_database
-@require_auth(permissions=["produto:update"])
+@require_auth()
 @validate_request_body(ProdutoUpdateDTO)
 async def update_product_handler(
     event,
@@ -209,7 +209,7 @@ async def update_product_handler(
 
 @lambda_handler
 @with_database
-@require_auth(permissions=["produto:delete"])
+@require_auth()
 async def delete_product_handler(
     event,
     context,
@@ -245,7 +245,7 @@ async def delete_product_handler(
 
 @lambda_handler
 @with_database
-@require_auth(permissions=["produto:search"])
+@require_auth()
 @validate_request_body(ProdutoSearchDTO)
 async def search_products_handler(
     event,
@@ -285,7 +285,7 @@ async def search_products_handler(
 
 @lambda_handler
 @with_database
-@require_auth(permissions=["produto:read"])
+@require_auth()
 async def get_products_by_category_handler(
     event,
     context,
